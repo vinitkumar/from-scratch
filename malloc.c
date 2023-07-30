@@ -34,13 +34,15 @@ void print_free_list() {
 }
 
 free_entry_t *find_free_entry(size_t size) {
+  free_entry_t *best_entry = FREE_LIST;
   for (uint64_t i=0; i < FREE_LIST_USED; i++) {
     free_entry_t *entry;
     entry = &FREE_LIST[i];
-    if (entry->size >= size) {
-      return entry;
+    if (entry->size >= size && entry->size < best_entry->size) {
+      best_entry = entry;
     }
   }
+  return best_entry;
 }
 
 
@@ -67,10 +69,24 @@ void *malloc(size_t size) {
   return user_ptr;
 }
 
-void free(void *pt) {
+void free(void *user_ptr) {
   free_entry_t *entry;
   entry = &FREE_LIST[FREE_LIST_USED];
 
+  void *base_ptr;
+  uint64_t *size_ptr;
+  uint64_t size;
+  base_ptr = user_ptr - 8;
+  size_ptr = base_ptr;
+
+  size = *size_ptr;
+
+  entry->ptr = base_ptr;
+  entry->size = size;
+
+  FREE_LIST_USED++;
+  printf("FREE\n");
+  print_free_list();
 }
 
 int main() {
@@ -86,12 +102,16 @@ int main() {
   strcpy(a, "foo\0");
   strcpy(b, "bar\0");
   strcpy(c, "baz\0");
+  printf("address of a\n");
   printf("%p\n", a);
+  printf("address of b\n");
   printf("%p\n", b);
+  printf("address of c\n");
   printf("%p\n", c);
   free(b);
 
   d = malloc(4);
+  printf("address of d\n");
   printf("%p\n", d);
   print_free_list();
 
