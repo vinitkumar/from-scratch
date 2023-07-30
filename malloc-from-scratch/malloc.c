@@ -1,11 +1,9 @@
+#include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
-#include <stdio.h>
-
 
 static uint8_t MEMORY_POOL[64];
 static uint8_t MEMORY_POOL_USED = 0;
-
 
 struct free_entry {
   void *ptr;
@@ -15,27 +13,26 @@ struct free_entry {
 typedef struct free_entry free_entry_t;
 
 static free_entry_t FREE_LIST[64] = {
-    (free_entry_t) {
-      .ptr = MEMORY_POOL,
-      .size = 64,
+    (free_entry_t){
+        .ptr = MEMORY_POOL,
+        .size = 64,
     },
 };
-
 
 static uint64_t FREE_LIST_USED = 1;
 
 void print_free_list() {
   printf("FREE LIST \n");
-  for (uint64_t i=0; i < FREE_LIST_USED; i++) {
-      free_entry_t *entry;
-      entry = &FREE_LIST[i];
-      printf("   %p(%llu)\n", entry->ptr, entry->size);
-    }
+  for (uint64_t i = 0; i < FREE_LIST_USED; i++) {
+    free_entry_t *entry;
+    entry = &FREE_LIST[i];
+    printf("   %p(%llu)\n", entry->ptr, entry->size);
+  }
 }
 
 free_entry_t *find_free_entry(size_t size) {
   free_entry_t *best_entry = FREE_LIST;
-  for (uint64_t i=0; i < FREE_LIST_USED; i++) {
+  for (uint64_t i = 0; i < FREE_LIST_USED; i++) {
     free_entry_t *entry;
     entry = &FREE_LIST[i];
     if (entry->size >= size && entry->size < best_entry->size) {
@@ -44,7 +41,6 @@ free_entry_t *find_free_entry(size_t size) {
   }
   return best_entry;
 }
-
 
 void *malloc(size_t size) {
   size += 8;
@@ -114,6 +110,4 @@ int main() {
   printf("address of d\n");
   printf("%p\n", d);
   print_free_list();
-
 }
-
